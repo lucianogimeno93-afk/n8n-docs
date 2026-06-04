@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    user-select: none;
+    -webkit-app-region: no-drag;
+  }
+  #pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba(20, 20, 20, 0.92);
+    border-radius: 40px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    max-width: 300px;
+  }
+  #dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .recording #dot { background: #ff3b30; animation: pulse 0.8s infinite; }
+  .processing #dot { background: #ff9f0a; animation: spin 1s linear infinite; border-radius: 2px; }
+  .done #dot { background: #30d158; }
+  .error #dot { background: #ff3b30; }
+  .keyword #dot { background: #0a84ff; }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity:1; }
+    50%      { transform: scale(1.4); opacity:0.6; }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  #label {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+</style>
+</head>
+<body>
+<div id="pill" class="recording">
+  <div id="dot"></div>
+  <span id="label">Escuchando...</span>
+</div>
+<script>
+  window.api.onState(({ status, text }) => {
+    const pill  = document.getElementById('pill')
+    const label = document.getElementById('label')
+    pill.className = status
+    label.textContent = text || ''
+  })
+</script>
+</body>
+</html>

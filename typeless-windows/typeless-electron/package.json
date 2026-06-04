@@ -1,0 +1,35 @@
+{
+  "name": "typeless-es",
+  "version": "1.0.0",
+  "description": "Dictado por voz en español con IA local",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "dependencies": {
+    "ollama": "^0.5.18",
+    "uiohook-napi": "^1.5.5"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.typeless.es",
+    "productName": "Typeless ES",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "src/**",
+      "renderer/**",
+      "assets/**"
+    ]
+  }
+}

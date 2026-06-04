@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Configuración</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 24px; background: #1e1e1e; color: #fff; font-size: 14px; }
+  h2   { margin: 0 0 20px; font-size: 18px; }
+  .group { margin-bottom: 18px; }
+  label { display: block; color: #aaa; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  input, select {
+    width: 100%; padding: 8px 12px; background: #2d2d2d;
+    border: 1px solid #444; border-radius: 8px; color: #fff;
+    font-size: 14px; outline: none; box-sizing: border-box;
+  }
+  input:focus, select:focus { border-color: #0a84ff; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row input { flex: 1; }
+  button {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .btn-primary { background: #0a84ff; color: #fff; }
+  .btn-secondary { background: #3a3a3a; color: #fff; }
+  .toggle { display: flex; align-items: center; gap: 10px; }
+  .toggle input[type=checkbox] { width: auto; accent-color: #0a84ff; }
+  #status { margin-top: 16px; font-size: 13px; color: #30d158; min-height: 20px; }
+  .divider { border: none; border-top: 1px solid #333; margin: 16px 0; }
+</style>
+</head>
+<body>
+<h2>Configuración</h2>
+
+<div class="group">
+  <label>Ejecutable de Whisper</label>
+  <input id="whisperExe" type="text" placeholder="C:\typeless\whisper-cli.exe">
+</div>
+<div class="group">
+  <label>Modelo de Whisper (.bin)</label>
+  <input id="whisperModel" type="text" placeholder="C:\typeless\ggml-small.bin">
+</div>
+<div class="group">
+  <label>Idioma</label>
+  <select id="language">
+    <option value="es">Español</option>
+    <option value="en">Inglés</option>
+    <option value="auto">Automático</option>
+  </select>
+</div>
+
+<hr class="divider">
+
+<div class="group">
+  <div class="toggle">
+    <input type="checkbox" id="useOllama">
+    <label style="text-transform:none;margin:0">Corregir con Ollama (IA local)</label>
+  </div>
+</div>
+<div class="group">
+  <label>Host de Ollama</label>
+  <div class="row">
+    <input id="ollamaHost" type="text" placeholder="http://127.0.0.1:11434">
+    <button class="btn-secondary" id="btnTest">Probar</button>
+  </div>
+</div>
+<div class="group">
+  <label>Modelo de Ollama</label>
+  <input id="ollamaModel" type="text" placeholder="llama3">
+</div>
+
+<hr class="divider">
+
+<div class="group">
+  <label>CSV de palabras clave</label>
+  <input id="csvPath" type="text" placeholder="C:\typeless\palabras.csv">
+</div>
+<div class="group">
+  <label>Respuesta al detectar palabra clave</label>
+  <input id="keywordReply" type="text" placeholder="ok">
+</div>
+<div class="group">
+  <label>Caracteres máximos para pegar directo (si es más, aparece "Copiar")</label>
+  <input id="maxPasteLen" type="number" min="100" max="5000">
+</div>
+
+<button class="btn-primary" id="btnSave" style="width:100%;padding:11px">Guardar</button>
+<p id="status"></p>
+
+<script>
+  let cfg = {}
+
+  window.api.getConfig().then(c => {
+    cfg = c
+    document.getElementById('whisperExe').value   = c.whisperExe   || ''
+    document.getElementById('whisperModel').value = c.whisperModel || ''
+    document.getElementById('language').value     = c.language     || 'es'
+    document.getElementById('useOllama').checked  = !!c.useOllama
+    document.getElementById('ollamaHost').value   = c.ollamaHost   || 'http://127.0.0.1:11434'
+    document.getElementById('ollamaModel').value  = c.ollamaModel  || 'llama3'
+    document.getElementById('csvPath').value      = c.csvPath      || ''
+    document.getElementById('keywordReply').value = c.keywordReply || 'ok'
+    document.getElementById('maxPasteLen').value  = c.maxPasteLen  || 400
+  })
+
+  document.getElementById('btnSave').onclick = async () => {
+    cfg = {
+      whisperExe:   document.getElementById('whisperExe').value.trim(),
+      whisperModel: document.getElementById('whisperModel').value.trim(),
+      language:     document.getElementById('language').value,
+      useOllama:    document.getElementById('useOllama').checked,
+      ollamaHost:   document.getElementById('ollamaHost').value.trim(),
+      ollamaModel:  document.getElementById('ollamaModel').value.trim(),
+      csvPath:      document.getElementById('csvPath').value.trim(),
+      keywordReply: document.getElementById('keywordReply').value.trim() || 'ok',
+      maxPasteLen:  parseInt(document.getElementById('maxPasteLen').value) || 400,
+    }
+    await window.api.saveConfig(cfg)
+    const s = document.getElementById('status')
+    s.textContent = '✓ Guardado'
+    setTimeout(() => s.textContent = '', 2000)
+  }
+
+  document.getElementById('btnTest').onclick = async () => {
+    const s = document.getElementById('status')
+    s.style.color = '#ff9f0a'
+    s.textContent = 'Conectando con Ollama...'
+    const res = await window.api.testOllama({
+      ollamaHost: document.getElementById('ollamaHost').value.trim()
+    })
+    if (res.ok) {
+      s.style.color = '#30d158'
+      s.textContent = `✓ Ollama OK. Modelos: ${res.models.join(', ')}`
+    } else {
+      s.style.color = '#ff3b30'
+      s.textContent = `✗ Error: ${res.error}`
+    }
+  }
+</script>
+</body>
+</html>

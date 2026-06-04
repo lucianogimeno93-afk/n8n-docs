@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Historial</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #1e1e1e; color: #fff; font-size: 14px; }
+  h2   { margin: 0 0 16px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+  .btn-danger { background: #ff3b30; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  #list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+  .item {
+    background: #2d2d2d; border-radius: 8px; padding: 10px 14px;
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+  }
+  .item:hover { background: #383838; }
+  .item-text { flex: 1; font-size: 13px; line-height: 1.4; }
+  .item-ts { font-size: 11px; color: #666; white-space: nowrap; }
+  .kw-badge { background: #0a84ff; color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 11px; flex-shrink: 0; }
+  #empty { color: #666; text-align: center; padding: 40px; }
+</style>
+</head>
+<body>
+<h2>Historial <button class="btn-danger" id="btnClear">Limpiar</button></h2>
+<div id="list"></div>
+<p id="empty" style="display:none">Sin historial todavía.</p>
+<script>
+  async function render() {
+    const hist = await window.api.getHistory()
+    const list  = document.getElementById('list')
+    const empty = document.getElementById('empty')
+    list.innerHTML = ''
+    if (!hist.length) { empty.style.display = 'block'; return }
+    empty.style.display = 'none'
+    hist.forEach(h => {
+      const div = document.createElement('div')
+      div.className = 'item'
+      div.title = 'Click para copiar'
+      const ts = new Date(h.ts).toLocaleString('es-AR')
+      div.innerHTML = `
+        ${h.keyword ? `<span class="kw-badge">clave</span>` : ''}
+        <span class="item-text">${h.text.substring(0,200)}${h.text.length>200?'…':''}</span>
+        <span class="item-ts">${ts}</span>`
+      div.onclick = () => window.api.copyText(h.text)
+      list.appendChild(div)
+    })
+  }
+
+  document.getElementById('btnClear').onclick = async () => {
+    if (confirm('¿Borrar todo el historial?')) { await window.api.clearHistory(); render() }
+  }
+
+  render()
+</script>
+</body>
+</html>
