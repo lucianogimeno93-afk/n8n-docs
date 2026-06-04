@@ -230,6 +230,12 @@ function stopRecording() {
 function transcribe(cfg) {
   return new Promise((resolve, reject) => {
     const outBase = tmpWav.replace('.wav', '')
+    console.log('[whisper] exe:', cfg.whisperExe)
+    console.log('[whisper] model:', cfg.whisperModel)
+    console.log('[whisper] wav:', tmpWav)
+    console.log('[whisper] exe existe:', fs.existsSync(cfg.whisperExe))
+    console.log('[whisper] model existe:', fs.existsSync(cfg.whisperModel))
+    console.log('[whisper] wav existe:', fs.existsSync(tmpWav))
     const args = [
       '--model', cfg.whisperModel,
       '--language', cfg.language,
@@ -238,15 +244,20 @@ function transcribe(cfg) {
       '--output-file', outBase,
       tmpWav,
     ]
-    const proc = spawn(cfg.whisperExe, args, { windowsHide: true })
+    console.log('[whisper] args:', args.join(' '))
+    const proc = spawn(cfg.whisperExe, args, { windowsHide: false })
+    proc.stdout.on('data', d => console.log('[whisper out]', d.toString().trim()))
+    proc.stderr.on('data', d => console.log('[whisper err]', d.toString().trim()))
     proc.on('close', code => {
+      console.log('[whisper] exit code:', code)
       const txtFile = outBase + '.txt'
+      console.log('[whisper] buscando:', txtFile, '— existe:', fs.existsSync(txtFile))
       if (!fs.existsSync(txtFile)) { reject(new Error('whisper no generó salida')); return }
       const text = fs.readFileSync(txtFile, 'utf8').trim()
       fs.unlinkSync(txtFile)
       resolve(text)
     })
-    proc.on('error', reject)
+    proc.on('error', e => { console.log('[whisper error]', e.message); reject(e) })
   })
 }
 
