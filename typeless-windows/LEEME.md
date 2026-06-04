@@ -1,98 +1,87 @@
 # Typeless para Windows 10 — Dictado en español
 
-Clon gratuito de Typeless. Usa Whisper de OpenAI corriendo **100% local** (sin internet, sin costo).
+Clon gratuito de Typeless. **No necesita Python ni instalador.**  
+Usa Whisper corriendo **100% local** (sin internet, sin costo mensual).
 
 ---
 
-## Instalación (una sola vez)
-
-### 1. Instalar Python 3.10 o superior
-Descargarlo de https://www.python.org/downloads/ — marcar "Add Python to PATH".
-
-### 2. Instalar FFmpeg (necesario para Whisper)
-```
-winget install ffmpeg
-```
-O descargarlo de https://ffmpeg.org/download.html y agregarlo al PATH.
-
-### 3. Instalar dependencias Python
-Abrir una terminal (cmd o PowerShell) en esta carpeta y ejecutar:
-```
-pip install -r requirements.txt
-```
-
-> Si `pyaudio` falla, instalar con:
-> ```
-> pip install pipwin
-> pipwin install pyaudio
-> ```
-
----
-
-## Uso
+## Archivos necesarios en la misma carpeta
 
 ```
-python typeless.py
-```
-
-**Mantené presionada la tecla ALT DERECHO** mientras hablás. Al soltar, el texto aparece donde esté el cursor.
-
-### Opciones
-
-| Opción | Descripción | Default |
-|--------|-------------|---------|
-| `--modelo` | `tiny` / `base` / `small` / `medium` / `large` | `small` |
-| `--csv` | Ruta al CSV con palabras clave | `palabras.csv` |
-| `--tecla` | Tecla push-to-talk | `right alt` |
-| `--respuesta` | Texto al detectar palabra clave | `ok` |
-
-### Ejemplos
-
-```bash
-# Usar modelo más preciso
-python typeless.py --modelo medium
-
-# Cambiar la tecla a F9
-python typeless.py --tecla f9
-
-# Usar tu propio CSV de palabras
-python typeless.py --csv mis_palabras.csv
-
-# Cuando detecte una palabra clave, responder "Entendido"
-python typeless.py --respuesta "Entendido"
+typeless.exe          ← este programa
+whisper-cli.exe       ← de whisper.cpp (ver abajo)
+ggml-small.bin        ← modelo de español (ver abajo)
+palabras.csv          ← tus palabras clave
 ```
 
 ---
 
-## Palabras clave (CSV)
+## Paso 1 — Descargar whisper-cli.exe
 
-El archivo `palabras.csv` tiene una palabra o frase por línea:
+1. Ir a: https://github.com/ggerganov/whisper.cpp/releases
+2. Bajar el archivo `whisper-bin-x64.zip` (la versión más reciente)
+3. Descomprimirlo y copiar `whisper-cli.exe` a la misma carpeta que `typeless.exe`
+
+---
+
+## Paso 2 — Descargar el modelo de español
+
+Recomendado: **ggml-small.bin** (244 MB, buena precisión en español rioplatense y mexicano)
+
+Descargarlo desde:
+https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+
+Copiarlo a la misma carpeta que `typeless.exe`.
+
+> Si querés más precisión: `ggml-medium.bin` (769 MB)  
+> Si querés más velocidad: `ggml-base.bin` (142 MB)
+
+---
+
+## Paso 3 — Editar palabras.csv
+
+Una palabra o frase por línea. Si el programa detecta esa frase en lo que dijiste, pega `ok` en lugar del texto:
 
 ```
 Sergio Mendoza
 Ana María
-hola
-gracias
 ```
-
-Si decís algo que contenga una de esas frases, en lugar de pegar lo que dijiste, pega la `--respuesta` (por defecto `ok`).
 
 ---
 
-## Modelos Whisper — tamaño y velocidad
+## Paso 4 — Ejecutar
 
-| Modelo | Tamaño | Velocidad | Precisión |
-|--------|--------|-----------|-----------|
-| tiny   | 75 MB  | muy rápido | básica |
-| base   | 142 MB | rápido     | buena  |
-| small  | 244 MB | normal     | muy buena ✓ recomendado |
-| medium | 769 MB | lento      | excelente |
-| large  | 1.5 GB | muy lento  | máxima |
+Doble clic en `typeless.exe`.
 
-El modelo se descarga automáticamente la primera vez que ejecutás el script.
+Se abre una ventana de consola que muestra el estado.  
+**Mantené presionado ALT DERECHO** mientras hablás.  
+Al soltar, el texto aparece donde esté el cursor (Word, Chrome, WhatsApp Web, etc.).
+
+---
+
+## Cambiar la respuesta al detectar una palabra clave
+
+Por defecto responde `ok`. Para cambiarlo, ejecutalo desde cmd:
+
+```
+typeless.exe "Entendido"
+```
+
+---
+
+## Estructura de la carpeta final
+
+```
+📁 typeless\
+  ├── typeless.exe
+  ├── whisper-cli.exe
+  ├── ggml-small.bin
+  └── palabras.csv
+```
 
 ---
 
 ## Español rioplatense y mexicano
 
-Whisper entiende ambas variantes sin configuración extra. El idioma está fijado en `es` para evitar que detecte otro idioma.
+Whisper entiende ambas variantes sin configuración extra.  
+El idioma está fijado en `es` para evitar que detecte otro idioma.
