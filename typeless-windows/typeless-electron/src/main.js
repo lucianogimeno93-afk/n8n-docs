@@ -165,18 +165,44 @@ function openHistory() {
 let ffmpegProc = null
 let tmpWav     = path.join(os.tmpdir(), 'typeless_rec.wav')
 
+function getAudioDevice(ffmpegPath) {
+  try {
+    const out = require('child_process').execSync(
+      `"${ffmpegPath}" -list_devices true -f dshow -i dummy 2>&1`,
+      { encoding: 'utf8', timeout: 5000, windowsHide: true }
+    )
+    const match = out.match(/"([^"]+)"\s*\(audio\)/)
+    if (match) {
+      console.log('[audio] Micrófono detectado:', match[1])
+      return match[1]
+    }
+  } catch (e) {
+    const out = e.stdout || e.stderr || e.message || ''
+    const match = out.match(/"([^"]+)"\s*\(audio\)/)
+    if (match) {
+      console.log('[audio] Micrófono detectado:', match[1])
+      return match[1]
+    }
+  }
+  console.log('[audio] Usando dispositivo por defecto')
+  return null
+}
+
 function startRecording() {
   const ffmpegPath = findFile(['ffmpeg.exe'], APP_DIR) || 'ffmpeg'
+  const device = getAudioDevice(ffmpegPath)
+  const input = device ? `audio=${device}` : 'audio='
+  console.log('[audio] Grabando desde:', input)
   ffmpegProc = spawn(ffmpegPath, [
     '-y',
     '-f', 'dshow',
-    '-i', 'audio=@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{default}',
+    '-i', input,
     '-ar', '16000',
     '-ac', '1',
     '-acodec', 'pcm_s16le',
     tmpWav,
   ], { windowsHide: true })
-  ffmpegProc.stderr.on('data', () => {}) // suprimir output
+  ffmpegProc.stderr.on('data', d => console.log('[ffmpeg]', d.toString().trim()))
 }
 
 function stopRecording() {
