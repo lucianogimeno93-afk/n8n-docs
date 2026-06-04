@@ -32,7 +32,9 @@ const CFG_FILE  = path.join(DATA_DIR, 'config.json')
 const HIST_FILE = path.join(DATA_DIR, 'history.json')
 
 const defaultConfig = {
-  whisperExe:   path.join(APP_DIR, 'whisper-cli.exe'),
+  whisperExe:   fs.existsSync(path.join(APP_DIR, 'whisper-cli.exe'))
+    ? path.join(APP_DIR, 'whisper-cli.exe')
+    : path.join(APP_DIR, 'main.exe'),
   whisperModel: path.join(APP_DIR, 'ggml-small.bin'),
   csvPath:      path.join(APP_DIR, 'palabras.csv'),
   keywordReply: 'ok',
