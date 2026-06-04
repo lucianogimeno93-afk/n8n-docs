@@ -9,8 +9,24 @@ const { Ollama } = require('ollama')
 // ---------------------------------------------------------------------------
 // Rutas
 // ---------------------------------------------------------------------------
-// Directorio raíz de la app: src/main.js está en src/, subimos un nivel a C:\typeless\
-const APP_DIR = path.join(__dirname, '..')
+// Busca el directorio raíz donde están whisper-cli.exe y el modelo
+function findAppDir() {
+  const candidates = [
+    path.join(__dirname, '..'),
+    path.dirname(app.getPath('exe')),
+    process.cwd(),
+    'C:\\typeless',
+  ]
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, 'whisper-cli.exe'))) {
+      console.log('[appdir] encontrado en:', dir)
+      return dir
+    }
+  }
+  console.log('[appdir] usando primer candidato:', candidates[0])
+  return candidates[0]
+}
+const APP_DIR   = findAppDir()
 const DATA_DIR  = path.join(app.getPath('userData'))
 const CFG_FILE  = path.join(DATA_DIR, 'config.json')
 const HIST_FILE = path.join(DATA_DIR, 'history.json')
