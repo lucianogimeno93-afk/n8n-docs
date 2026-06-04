@@ -335,14 +335,10 @@ app.whenReady().then(() => {
 
   createFloatingWindow()
 
-  // Bandeja del sistema
+  // Bandeja del sistema — ícono embebido en base64 (16x16 azul)
   const { nativeImage } = require('electron')
-  const iconPath = path.join(__dirname, '..', 'assets', 'icon.png')
-  let trayIcon
-  try {
-    trayIcon = nativeImage.createFromPath(iconPath)
-    if (trayIcon.isEmpty()) trayIcon = nativeImage.createEmpty()
-  } catch { trayIcon = nativeImage.createEmpty() }
+  const ICON_B64 = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAAN0lEQVQ4jWNgGAWkAkYGBob/VMBQBwMDA8P/oXYBGRkZ/Q+1CxgYGBiG2gVkZGT0f6hdQBUAABCOBAVqamPKAAAAAElFTkSuQmCC'
+  const trayIcon = nativeImage.createFromDataURL('data:image/png;base64,' + ICON_B64)
   tray = new Tray(trayIcon)
   tray.setToolTip('Typeless ES')
   tray.setContextMenu(Menu.buildFromTemplate([
@@ -352,8 +348,11 @@ app.whenReady().then(() => {
     { label: 'Salir',           click: () => app.quit() },
   ]))
 
-  // Hotkey global: Numpad 5 — toggle (primer press: empieza, segundo press: termina)
+  // Hotkey global: Numpad 5 — toggle
+  console.log('[uiohook] Iniciando listener de teclado...')
+  console.log('[uiohook] Numpad5 keycode esperado:', UiohookKey.Numpad5)
   uIOhook.on('keydown', e => {
+    console.log('[keydown] keycode:', e.keycode)
     if (e.keycode !== UiohookKey.Numpad5) return
     if (!isRecording) {
       isRecording = true
@@ -363,7 +362,12 @@ app.whenReady().then(() => {
       handleRelease()
     }
   })
-  uIOhook.start()
+  try {
+    uIOhook.start()
+    console.log('[uiohook] OK — presioná Numpad 5')
+  } catch (e) {
+    console.error('[uiohook] ERROR:', e.message)
+  }
 
   // IPC handlers
   ipcMain.handle('get-config',  () => loadConfig())
