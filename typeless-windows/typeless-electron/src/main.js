@@ -9,10 +9,8 @@ const { Ollama } = require('ollama')
 // ---------------------------------------------------------------------------
 // Rutas
 // ---------------------------------------------------------------------------
-// En desarrollo apunta a C:\typeless, en producción al directorio del exe
-const APP_DIR = app.isPackaged
-  ? path.dirname(app.getPath('exe'))
-  : path.join(__dirname, '..')
+// Directorio raíz de la app (donde están whisper-cli.exe y el modelo)
+const APP_DIR = process.cwd()
 const DATA_DIR  = path.join(app.getPath('userData'))
 const CFG_FILE  = path.join(DATA_DIR, 'config.json')
 const HIST_FILE = path.join(DATA_DIR, 'history.json')
