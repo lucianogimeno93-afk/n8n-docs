@@ -336,8 +336,14 @@ app.whenReady().then(() => {
   createFloatingWindow()
 
   // Bandeja del sistema
+  const { nativeImage } = require('electron')
   const iconPath = path.join(__dirname, '..', 'assets', 'icon.png')
-  tray = new Tray(fs.existsSync(iconPath) ? iconPath : path.join(__dirname, '..', 'assets', 'icon-fallback.png'))
+  let trayIcon
+  try {
+    trayIcon = nativeImage.createFromPath(iconPath)
+    if (trayIcon.isEmpty()) trayIcon = nativeImage.createEmpty()
+  } catch { trayIcon = nativeImage.createEmpty() }
+  tray = new Tray(trayIcon)
   tray.setToolTip('Typeless ES')
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Historial',       click: openHistory },
