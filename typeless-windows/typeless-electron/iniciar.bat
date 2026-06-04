@@ -1,3 +1,3 @@
 @echo off
-cd /d "%~dp0"
-npx electron .
+cd /d C:\typeless
+npm start
